@@ -1,5 +1,8 @@
-import React from "react";
-import { Button, List, ListItem, ListItemText } from "@mui/material";
+import { Button, List, ListItem, ListItemText, Snackbar } from "@mui/material";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearAll } from "./redux/store/slices/basketSlice";
 
 type Product = {
   title: string;
@@ -18,6 +21,25 @@ function Cart({
   text = "Browse the items in your cart and then click Checkout",
   mode = "browse",
 }: CartProps) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const [toggleSnackbar, setToggleSnackbar] = useState(false);
+
+  const checkOut = () => {
+    navigate("/checkout");
+  };
+
+  const confirmOrder = () => {
+    dispatch(clearAll());
+    setToggleSnackbar(true);
+  };
+
+  const closeSnackbar = () => {
+    setToggleSnackbar(false);
+    navigate("/products");
+  };
+
   return (
     <div>
       <h1>Shopping Cart</h1>
@@ -38,20 +60,30 @@ function Cart({
       {mode === "browse" ? (
         <Button
           style={{ marginBottom: 10 }}
-          href={"/checkout"}
+          onClick={checkOut}
           variant="contained"
+          disabled={products.length < 1}
         >
           Checkout
         </Button>
       ) : (
         <Button
           style={{ marginBottom: 10 }}
-          href={"/checkout"}
           variant="contained"
+          onClick={confirmOrder}
+          disabled={products.length < 1}
         >
           Confirm Order
         </Button>
       )}
+
+      <Snackbar
+        open={toggleSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        autoHideDuration={3000}
+        onClose={closeSnackbar}
+        message="Wohoo!! Order placed successfully"
+      />
     </div>
   );
 }

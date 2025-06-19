@@ -1,34 +1,38 @@
-import React from "react";
-import axios from "axios";
 import {
   Button,
   Card,
   CardActions,
   CardContent,
   CardMedia,
+  Divider,
   Grid,
   Typography,
-  Divider,
 } from "@mui/material";
+import axios from "axios";
+import React from "react";
 import Cart from "./Cart";
 
-type Product = {
-  id: number;
-  title: string;
-  price: number;
-  thumbnail: string;
-  quantity: number;
-};
+import { connect } from "react-redux";
+import { addItem, Product } from "./redux/store/slices/basketSlice";
+import { RootState } from "./redux/store/store";
 
 type ProductListState = {
   products: Product[];
-  productsInCart: Product[];
 };
 
-class ProductList extends React.Component<{}, ProductListState> {
+interface ReduxStateProps {
+  basketItems: Product[];
+}
+
+interface ReduxDispatchProps {
+  addItem: (product: Product) => void;
+}
+
+type Props = ReduxStateProps & ReduxDispatchProps;
+
+class ProductList extends React.Component<Props, ProductListState> {
   state: ProductListState = {
     products: [],
-    productsInCart: [],
   };
 
   componentDidMount() {
@@ -40,15 +44,15 @@ class ProductList extends React.Component<{}, ProductListState> {
 
   addToCart = (product: Product) => {
     const newProduct = { ...product, quantity: 1 };
-    this.setState((prevState) => ({
-      productsInCart: [...prevState.productsInCart, newProduct],
-    }));
+    this.props.addItem(newProduct);
   };
 
   render() {
+    const { basketItems } = this.props;
+
     return (
       <div>
-        <Cart products={this.state.productsInCart} />
+        <Cart products={basketItems} />
         <Divider />
         <h1>Products</h1>
         <Grid
@@ -86,4 +90,12 @@ class ProductList extends React.Component<{}, ProductListState> {
   }
 }
 
-export default ProductList;
+const mapStateToProps = (state: RootState): ReduxStateProps => ({
+  basketItems: state.basket.products,
+});
+
+const mapDispatchToProps: ReduxDispatchProps = {
+  addItem,
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProductList);
