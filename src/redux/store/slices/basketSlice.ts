@@ -22,8 +22,19 @@ export const basketSlice = createSlice({
   initialState,
   reducers: {
     addItem: (state, action: PayloadAction<Product>) => {
-      state.products = [action.payload, ...state.products];
+      const productIndex = state.products.findIndex(
+        (product) => product.id === action.payload.id
+      );
+
+      if (productIndex == -1) {
+        state.products = [action.payload, ...state.products];
+      } else {
+        const products = state.products;
+        products[productIndex].quantity += 1;
+        state.products = [...products];
+      }
     },
+
     clearAll: (state) => {
       state.products = [];
     },
