@@ -2,13 +2,7 @@ import { Button, List, ListItem, ListItemText, Snackbar } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { clearAll } from "./redux/store/slices/basketSlice";
-
-type Product = {
-  title: string;
-  quantity: number;
-  price: number;
-};
+import { clearAll, Product } from "./redux/store/slices/basketSlice";
 
 type CartProps = {
   products?: Product[];
@@ -40,6 +34,14 @@ function Cart({
     navigate("/products");
   };
 
+  const calcDiscountedPrice = (
+    price: number,
+    discount: number,
+    quantity: number
+  ) => {
+    return (price - (price * discount) / 100) * quantity;
+  };
+
   return (
     <div>
       <h1>Shopping Cart</h1>
@@ -55,7 +57,29 @@ function Cart({
         ))}
       </List>
       <div>
-        Total Price: {products.reduce((total, { price }) => total + price, 0)}
+        <span>
+          Total Price:&nbsp;
+          <span style={{ color: "red", fontWeight: 600 }}>
+            {products.reduce(
+              (total, { price, quantity }) => total + price * quantity,
+              0
+            )}
+          </span>
+        </span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span>
+          Discounted Price:&nbsp;
+          <span style={{ color: "green", fontWeight: 600 }}>
+            {products
+              .reduce(
+                (total, { price, discountPercentage, quantity }) =>
+                  total +
+                  calcDiscountedPrice(price, discountPercentage, quantity),
+                0
+              )
+              .toFixed(2)}
+          </span>
+        </span>
       </div>
       {mode === "browse" ? (
         <Button
@@ -82,7 +106,7 @@ function Cart({
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         autoHideDuration={3000}
         onClose={closeSnackbar}
-        message="Wohoo!! Order placed successfully"
+        message="Wohoo!! Order placed successfully!!!"
       />
     </div>
   );
